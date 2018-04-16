@@ -1,0 +1,171 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" [routerLink]="['/']">Gourmet</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor02"
+      aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarColor02">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item" *ngIf="current_user">
+          <a class="nav-link" [routerLink]="['/orderhistory', current_user._id]">Order History</a>
+        </li>
+        
+        <li *ngIf="loggedIn || current_user != null" class="nav-item">
+          <div class="w3-dropdown-hover">
+            <button class="w3-button">Online Users: {{total_login_user.length}}</button>
+            <div class="w3-dropdown-content w3-bar-block w3-border">
+              <span class="w3-bar-item w3-button w3-blue w3-row" *ngFor="let user of total_login_user" >{{user.info.first_name}} {{user.info.last_name}}</span>
+            </div>
+          </div>
+        </li>
+      </ul>
+      <a [routerLink]="['/new_menu']">
+        <button class="btn btn-secondary my-2 my-sm-0" type="submit" *ngIf="current_user != undefined && current_user.user_level == 9">
+          <i class="fa fa-cutlery fa-1x icon" aria-hidden="true"></i>Add New Munu </button>
+        </a>
+        <a [routerLink]="['/new_user']">
+          <button class="btn btn-secondary my-2 my-sm-0" type="submit" *ngIf="current_user != undefined && current_user.user_level == 9">
+            <i class="fa fa-user-o fa-lg icon" aria-hidden="true"></i>Add New User </button>
+          </a>
+
+          <div *ngIf="!(loggedIn || current_user != null)">
+            <a [routerLink]="['/login']">
+              <button class="btn btn-secondary my-2 my-sm-0" type="submit" *ngIf="current_user == null">
+                <i class="fa fa-sign-in" aria-hidden="true"></i> Log in </button>
+              </a>
+
+              <a>
+                <button class="btn btn-social-icon btn-google" (click)="signInWithGoogle()">
+                  <span class="fa fa-google"></span>
+                </button>
+              </a>
+          <!-- <a>
+            <button class="btn btn-social-icon btn-facebook" (click)="signInWithFB()">
+              <span class="fa fa-facebook"></span>
+            </button>
+          </a> -->
+        </div>
+        <div *ngIf="loggedIn || current_user != null">
+          <div class="card-block">
+            <img class="card-img-top img-responsive photo" src="{{ imageurl }}">
+          </div>
+          <div class="card-block">
+            <h4 class="card-title">{{ current_user?.first_name }}</h4>
+            <p class="card-text">{{ current_user?.email }}</p>
+          </div>
+        </div>
+
+      </div>
+      <button *ngIf="loggedIn || current_user != null" class="btn btn-danger" (click)="signOut()">
+        <i class="fa fa-sign-out" aria-hidden="true"></i> Log out</button>
+      </div>
+    </nav>
+    <div class="jumbotron">
+      <div class="container">
+        <h1 class="animated infinite bounce">Ready to Order?</h1>
+      </div>
+    </div>
+
+    <section id="service">
+      <div class="container">
+        <div class="row justify-content-md-center">
+          <div class="col-lg-8">
+            <h2 class="text-center mt-4">
+              <i class="fa fa-cutlery" aria-hidden="true"></i> Our Food
+              <strong>Service</strong>
+            </h2>
+            <hr>
+            <p class="large text-center">
+              Atque ducimus velit, earum quidem, iusto dolorem. Ex ipsam totam quas blanditiis, pariatur maxime ipsa iste, doloremque neque
+              doloribus, error. Corrupti, tenetur.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="show">
+      <div class="container1">
+        <div class="card mb-3" id="sideCard">
+          <h3 class="card-header">Food Truck Info:</h3>
+          <img style="width:100%;" src="/assets/images/foodtruck.jpg"
+          alt="Card image">
+          <ul class="list-group">
+            <li *ngFor="let a of all_foods" class="list-group-item font">
+
+              <img src="{{a.image}}" class="image thumbnail">
+
+              <div id="foodInfo" class="col-sm-5 col-xs-5">
+                <p><span class="setfont">Food Name:</span> <span class="setfont2">{{a.food_name}}</span></p>
+                <p><span class="setfont">Description:</span> <span class="setfont2">{{a.description}}</span></p>
+                <p><span class="setfont">Price:</span> <span class="setfont2">{{a.price}}</span></p>
+                <form (submit)="create_order(a)" *ngIf="current_user != null" #addfood="ngForm">
+                  <label class="setfont" style="display: inline-block;">Quantity:</label>
+                
+                  <input class="form-control1" style="display: inline-block;" type="number" [(ngModel)]="a.quantity" required min="1" name="quantity" #quantity="ngModel">
+                  <button class="btn btn-warning" [disabled]="!addfood.valid">Add</button>
+                  <p><span class="setfont">Total price:</span> <span class="setfont2">{{a.quantity * a.price}}</span></p>
+                  
+
+                </form>
+                <span *ngIf = "current_user !== null">
+                <button class="btn btn-danger btn-sm" *ngIf="current_user.user_level == 9" (click)="delete_food(a._id)">Delete</button>
+                </span>
+                <button (click)="like(a._id)">
+                  <span>
+                    <i class="fa fa-thumbs-up" aria-hidden="true"></i>
+                  </span>
+                </button>
+                {{a.likeBy.length}}
+              </div>
+            </li>
+          </ul>
+          
+        </div>
+        <app-checkout></app-checkout>
+        
+      </div>
+    </div>
+
+
+
+    <footer id="myFooter">
+      <div class="container">
+        <agm-map [latitude]="lat" [longitude]="lng" [zoom]="zoom">
+          <agm-marker [latitude]="lat" [longitude]="lng"></agm-marker>
+        </agm-map>
+      </div>
+      <div class="social-networks">
+        <a href="#" class="twitter">
+          <i class="fa fa-twitter"></i>
+        </a>
+        <a href="#" class="facebook">
+          <i class="fa fa-facebook"></i>
+        </a>
+        <a href="#" class="google">
+          <i class="fa fa-instagram"></i>
+        </a>
+      </div>
+      <div class="footer-copyright">
+        <p>© 2018 Three Line Technology </p>
+      </div>
+    </footer>
+
+
+
+
+
+  </body>
+
+  </html>
